@@ -1,0 +1,728 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IntelliSchedule Dashboard</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+header {
+    background: #172554;
+    color: white;
+    padding: 25px;
+}
+
+header h1 {
+    margin-bottom: 8px;
+}
+
+header p {
+    color: #cbd5e1;
+}
+
+.container {
+    padding: 25px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #00000010;
+}
+
+.card h3 {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.card h2 {
+    color: #2563eb;
+    font-size: 28px;
+}
+
+.section {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 8px #00000010;
+}
+
+.section h2 {
+    margin-bottom: 18px;
+}
+
+input, select {
+    padding: 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin: 5px;
+    min-width: 130px;
+}
+
+button {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    background: #2563eb;
+    margin: 5px;
+    font-weight: bold;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+.green {
+    background: #16a34a;
+}
+
+.orange {
+    background: #ea580c;
+}
+
+.red {
+    background: #dc2626;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 13px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background: #eff6ff;
+}
+
+.priority {
+    font-weight: bold;
+}
+
+.high { color: #dc2626; }
+.medium { color: #ea580c; }
+.low { color: #16a34a; }
+
+.results {
+    background: #eff6ff;
+    padding: 18px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.progress {
+    background: #e2e8f0;
+    height: 14px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-bar {
+    background: #2563eb;
+    height: 100%;
+    width: 0%;
+}
+
+.chart-row {
+    margin: 20px 0;
+}
+
+.chart-bar {
+    background: #2563eb;
+    height: 25px;
+    border-radius: 5px;
+    margin-top: 7px;
+    color: white;
+    font-size: 12px;
+    padding-left: 8px;
+    line-height: 25px;
+    min-width: 0;
+}
+
+@media(max-width: 800px) {
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .container {
+        padding: 12px;
+    }
+
+    .section {
+        overflow-x: auto;
+    }
+
+    input, select {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>IntelliSchedule</h1>
+    <p>Intelligent Task Scheduling and Resource Allocation System</p>
+</header>
+
+<div class="container">
+
+    <!-- DASHBOARD STATISTICS -->
+
+    <div class="stats">
+
+        <div class="card">
+            <h3>Total Tasks</h3>
+            <h2 id="totalTasks">6</h2>
+        </div>
+
+        <div class="card">
+            <h3>Scheduled Tasks</h3>
+            <h2 id="scheduledTasks">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>Resource Capacity</h3>
+            <h2 id="resourceCapacity">5</h2>
+        </div>
+
+        <div class="card">
+            <h3>Resource Utilization</h3>
+            <h2 id="utilization">0%</h2>
+        </div>
+
+    </div>
+
+    <!-- ADD TASK -->
+
+    <div class="section">
+
+        <h2>Add New Task</h2>
+
+        <input type="text" id="taskName"
+               placeholder="Task Name">
+
+        <input type="number" id="start"
+               placeholder="Start Time (hour)" min="0">
+
+        <input type="number" id="finish"
+               placeholder="Finish Time (hour)" min="1">
+
+        <select id="priority">
+            <option value="1">Low Priority</option>
+            <option value="2">Medium Priority</option>
+            <option value="3">High Priority</option>
+        </select>
+
+        <input type="number" id="resources"
+               placeholder="Resource Units" min="1">
+
+        <button onclick="addTask()">Add Task</button>
+
+    </div>
+
+    <!-- TASK TABLE -->
+
+    <div class="section">
+
+        <h2>Task Management</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Task Name</th>
+                    <th>Start</th>
+                    <th>Finish</th>
+                    <th>Priority</th>
+                    <th>Resources</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="taskTable"></tbody>
+
+        </table>
+
+    </div>
+
+    <!-- ALGORITHM SELECTION -->
+
+    <div class="section">
+
+        <h2>Scheduling Algorithm</h2>
+
+        <select id="algorithm">
+            <option value="greedy">Greedy Algorithm</option>
+            <option value="dp">Dynamic Programming</option>
+        </select>
+
+        <button onclick="scheduleTasks()">
+            Run Scheduler
+        </button>
+
+        <button class="orange" onclick="resetTasks()">
+            Reset Demo
+        </button>
+
+        <div class="results" id="result">
+            Select an algorithm and click Run Scheduler.
+        </div>
+
+    </div>
+
+    <!-- SCHEDULED TASKS -->
+
+    <div class="section">
+
+        <h2>Optimized Schedule</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Start Time</th>
+                    <th>Finish Time</th>
+                    <th>Priority</th>
+                    <th>Resources</th>
+                </tr>
+            </thead>
+
+            <tbody id="scheduleTable"></tbody>
+
+        </table>
+
+    </div>
+
+    <!-- RESOURCE UTILIZATION -->
+
+    <div class="section">
+
+        <h2>Resource Utilization</h2>
+
+        <p id="resourceText">No schedule generated yet.</p>
+
+        <div class="progress">
+            <div class="progress-bar" id="resourceBar"></div>
+        </div>
+
+    </div>
+
+    <!-- ALGORITHM COMPARISON -->
+
+    <div class="section">
+
+        <h2>Algorithm Comparison</h2>
+
+        <div class="chart-row">
+            <p>Greedy - Selected Priority Score</p>
+            <div class="chart-bar" id="greedyBar">0</div>
+        </div>
+
+        <div class="chart-row">
+            <p>Dynamic Programming - Selected Priority Score</p>
+            <div class="chart-bar" id="dpBar">0</div>
+        </div>
+
+        <p id="comparison"></p>
+
+    </div>
+
+</div>
+
+<script>
+
+// INITIAL TASK DATA
+
+let tasks = [
+    {id:1, name:"Project Development", start:9, finish:11, priority:3, resources:2},
+    {id:2, name:"Database Management", start:11, finish:13, priority:2, resources:2},
+    {id:3, name:"Testing", start:10, finish:12, priority:3, resources:1},
+    {id:4, name:"Documentation", start:13, finish:15, priority:1, resources:1},
+    {id:5, name:"Deployment", start:15, finish:17, priority:3, resources:2},
+    {id:6, name:"Final Review", start:12, finish:14, priority:2, resources:1}
+];
+
+let selectedTasks = [];
+let resourceLimit = 5;
+
+function priorityName(p) {
+    return p === 3 ? "High" :
+           p === 2 ? "Medium" : "Low";
+}
+
+// DISPLAY TASKS
+
+function displayTasks() {
+
+    let table = document.getElementById("taskTable");
+
+    table.innerHTML = "";
+
+    tasks.forEach(task => {
+
+        table.innerHTML += `
+        <tr>
+            <td>${task.id}</td>
+            <td>${task.name}</td>
+            <td>${task.start}:00</td>
+            <td>${task.finish}:00</td>
+            <td class="priority ${priorityName(task.priority).toLowerCase()}">
+                ${priorityName(task.priority)}
+            </td>
+            <td>${task.resources}</td>
+            <td>
+                <button class="red"
+                onclick="deleteTask(${task.id})">Delete</button>
+            </td>
+        </tr>
+        `;
+
+    });
+
+    document.getElementById("totalTasks").innerText = tasks.length;
+}
+
+// ADD TASK
+
+function addTask() {
+
+    let name = document.getElementById("taskName").value.trim();
+    let start = Number(document.getElementById("start").value);
+    let finish = Number(document.getElementById("finish").value);
+    let priority = Number(document.getElementById("priority").value);
+    let resources = Number(document.getElementById("resources").value);
+
+    if (!name || document.getElementById("start").value === "" ||
+        document.getElementById("finish").value === "" ||
+        document.getElementById("resources").value === "" ||
+        !Number.isInteger(start) || !Number.isInteger(finish) ||
+        !Number.isInteger(resources) || start < 0 ||
+        finish <= start || resources <= 0) {
+
+        alert("Please enter valid task details.");
+        return;
+    }
+
+    tasks.push({
+        id: Date.now(),
+        name,
+        start,
+        finish,
+        priority,
+        resources
+    });
+
+    displayTasks();
+
+    document.getElementById("taskName").value = "";
+    document.getElementById("start").value = "";
+    document.getElementById("finish").value = "";
+    document.getElementById("resources").value = "";
+}
+
+// DELETE TASK
+
+function deleteTask(id) {
+
+    tasks = tasks.filter(task => task.id !== id);
+
+    displayTasks();
+    selectedTasks = [];
+    document.getElementById("scheduleTable").innerHTML = "";
+    document.getElementById("result").innerText =
+        "Task removed. Run the scheduler again.";
+    document.getElementById("scheduledTasks").innerText = 0;
+    document.getElementById("utilization").innerText = "0%";
+    document.getElementById("resourceBar").style.width = "0%";
+}
+
+// GREEDY ALGORITHM
+
+function greedyScheduling() {
+
+    let sorted = [...tasks].sort((a,b) =>
+        a.finish - b.finish
+    );
+
+    let result = [];
+    let lastFinish = -Infinity;
+
+    sorted.forEach(task => {
+
+        if (task.start >= lastFinish &&
+            task.resources <= resourceLimit) {
+
+            result.push(task);
+            lastFinish = task.finish;
+        }
+
+    });
+
+    return result;
+}
+
+// DYNAMIC PROGRAMMING ALGORITHM
+
+function dpScheduling() {
+
+    let sorted = [...tasks].sort((a,b) =>
+        a.finish - b.finish
+    );
+
+    let n = sorted.length;
+
+    let dp = Array(n + 1).fill(0);
+    let previous = Array(n).fill(-1);
+
+    // FIND PREVIOUS NON-OVERLAPPING TASK
+
+    for (let i = 0; i < n; i++) {
+
+        for (let j = i - 1; j >= 0; j--) {
+
+            if (sorted[j].finish <= sorted[i].start) {
+                previous[i] = j;
+                break;
+            }
+
+        }
+
+    }
+
+    // DP CALCULATION
+
+    for (let i = 1; i <= n; i++) {
+
+        let task = sorted[i - 1];
+
+        let include = task.resources <= resourceLimit
+            ? task.priority + dp[previous[i - 1] + 1]
+            : -Infinity;
+
+        let exclude = dp[i - 1];
+
+        dp[i] = Math.max(include, exclude);
+    }
+
+    // BACKTRACK TO GET SELECTED TASKS
+
+    let result = [];
+    let i = n;
+
+    while (i > 0) {
+
+        let task = sorted[i - 1];
+
+        let include = task.resources <= resourceLimit
+            ? task.priority + dp[previous[i - 1] + 1]
+            : -Infinity;
+
+        if (include > dp[i - 1]) {
+
+            result.push(task);
+            i = previous[i - 1] + 1;
+
+        } else {
+
+            i--;
+        }
+
+    }
+
+    return result.reverse();
+}
+
+// RUN SCHEDULER
+
+function scheduleTasks() {
+
+    let algorithm = document.getElementById("algorithm").value;
+
+    let startTime = performance.now();
+
+    if (algorithm === "greedy") {
+        selectedTasks = greedyScheduling();
+    } else {
+        selectedTasks = dpScheduling();
+    }
+
+    let endTime = performance.now();
+
+    let executionTime = (endTime - startTime).toFixed(3);
+
+    let score = selectedTasks.reduce(
+        (sum, task) => sum + task.priority, 0
+    );
+
+    let duration = selectedTasks.reduce(
+        (sum, task) => sum + task.finish - task.start, 0
+    );
+
+    let windowStart = Math.min(...tasks.map(t => t.start), 0);
+    let windowEnd = Math.max(...tasks.map(t => t.finish), 0);
+    let totalWindow = windowEnd - windowStart;
+
+    let utilization = totalWindow > 0
+        ? Math.min(100, (duration / totalWindow) * 100)
+        : 0;
+
+    document.getElementById("scheduledTasks").innerText =
+        selectedTasks.length;
+
+    document.getElementById("utilization").innerText =
+        utilization.toFixed(1) + "%";
+
+    document.getElementById("resourceBar").style.width =
+        utilization + "%";
+
+    document.getElementById("resourceText").innerText =
+        "Time utilization: " + utilization.toFixed(1) +
+        "% | Selected priority score: " + score;
+
+    document.getElementById("result").innerHTML = `
+        <h3>Scheduling Result</h3>
+        <p>Algorithm: ${algorithm === "greedy" ?
+            "Greedy" : "Dynamic Programming"}</p>
+        <p>Selected Tasks: ${selectedTasks.length}</p>
+        <p>Total Priority Score: ${score}</p>
+        <p>Execution Time: ${executionTime} ms</p>
+        <p>Time Utilization: ${utilization.toFixed(1)}%</p>
+    `;
+
+    displaySchedule();
+
+    compareAlgorithms();
+}
+
+// DISPLAY SCHEDULE
+
+function displaySchedule() {
+
+    let table = document.getElementById("scheduleTable");
+
+    table.innerHTML = "";
+
+    selectedTasks.forEach(task => {
+
+        table.innerHTML += `
+        <tr>
+            <td>${task.name}</td>
+            <td>${task.start}:00</td>
+            <td>${task.finish}:00</td>
+            <td>${priorityName(task.priority)}</td>
+            <td>${task.resources}</td>
+        </tr>
+        `;
+
+    });
+
+}
+
+// COMPARE BOTH ALGORITHMS
+
+function compareAlgorithms() {
+
+    let greedy = greedyScheduling();
+    let dp = dpScheduling();
+
+    let greedyScore = greedy.reduce(
+        (sum,t) => sum + t.priority, 0
+    );
+
+    let dpScore = dp.reduce(
+        (sum,t) => sum + t.priority, 0
+    );
+
+    let max = Math.max(greedyScore, dpScore, 1);
+
+    let greedyWidth = greedyScore / max * 100;
+    let dpWidth = dpScore / max * 100;
+
+    document.getElementById("greedyBar").style.width =
+        greedyWidth + "%";
+
+    document.getElementById("dpBar").style.width =
+        dpWidth + "%";
+
+    document.getElementById("greedyBar").innerText =
+        greedyScore + " points";
+
+    document.getElementById("dpBar").innerText =
+        dpScore + " points";
+
+    document.getElementById("comparison").innerText =
+        "Greedy Score: " + greedyScore +
+        " | Dynamic Programming Score: " + dpScore;
+}
+
+// RESET
+
+function resetTasks() {
+
+    tasks = [
+        {id:1, name:"Project Development", start:9, finish:11, priority:3, resources:2},
+        {id:2, name:"Database Management", start:11, finish:13, priority:2, resources:2},
+        {id:3, name:"Testing", start:10, finish:12, priority:3, resources:1},
+        {id:4, name:"Documentation", start:13, finish:15, priority:1, resources:1},
+        {id:5, name:"Deployment", start:15, finish:17, priority:3, resources:2},
+        {id:6, name:"Final Review", start:12, finish:14, priority:2, resources:1}
+    ];
+
+    selectedTasks = [];
+
+    displayTasks();
+
+    document.getElementById("scheduleTable").innerHTML = "";
+    document.getElementById("result").innerText =
+        "Select an algorithm and click Run Scheduler.";
+    document.getElementById("scheduledTasks").innerText = 0;
+    document.getElementById("utilization").innerText = "0%";
+    document.getElementById("resourceBar").style.width = "0%";
+    document.getElementById("resourceText").innerText =
+        "No schedule generated yet.";
+}
+
+// INITIALIZE DASHBOARD
+
+displayTasks();
+
+</script>
+
+</body>
+</html>
